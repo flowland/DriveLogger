@@ -12,8 +12,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 public class AppMain extends Application {
 
@@ -114,6 +118,20 @@ public class AppMain extends Application {
 			return false;
 		}
 	}
+	/*public boolean showDeleteConfirmation() {
+		Stage confirmStage = new Stage();
+		confirmStage.setTitle("Kustuta kirje?");
+		Button okButton = new Button();
+		Button cancelButton = new Button();
+		Label warningLabel = new Label();
+		VBox alert = new VBox();
+		HBox buttons = new HBox();
+		buttons.getChildren().addAll(okButton, cancelButton);
+		alert.getChildren().addAll(warningLabel, buttons);
+		Scene scene = new Scene(alert, 200, 200);
+		confirmStage.setScene(scene);
+		confirmStage.show();
+	}*/
 
 	/**
 	 * Getter for the primary stage

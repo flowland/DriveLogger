@@ -9,6 +9,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import drivelogger.logger.AppMain;
 import drivelogger.logger.model.LogEntry;
+import drivelogger.logger.view.DeleteAlert;
+
 
 public class OverviewController {
 	@FXML
@@ -66,6 +68,7 @@ public class OverviewController {
 
 	@FXML
 	private void deleteFromList() {
+		DeleteAlert dalert = new DeleteAlert();
 		int index = logEntries.getSelectionModel().getSelectedIndex();
 		if (index < 0) {
 			Alert redAlert = new Alert(AlertType.WARNING);
@@ -74,7 +77,7 @@ public class OverviewController {
 			redAlert.setHeaderText("Tühi sissekanne");
 			redAlert.setContentText("Palun valige üks päeviku sissekanne");
 			redAlert.showAndWait();
-		} else {
+		} else if(dalert.showDeleteConfirmation() == true) {
 			logEntries.getItems().remove(index);
 		}
 	}
