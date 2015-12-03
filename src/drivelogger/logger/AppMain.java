@@ -3,10 +3,12 @@ package drivelogger.logger;
 import java.io.IOException;
 
 import drivelogger.logger.model.LogEntry;
+import drivelogger.logger.view.AddController;
 import drivelogger.logger.view.OverviewController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -80,6 +82,36 @@ public class AppMain extends Application {
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public boolean showEntryWindow(LogEntry entry) {
+		try {
+			// creates loader & loads the new entry fxml file
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(AppMain.class.getResource("view/AddEntry.fxml"));
+			AnchorPane newPage = (AnchorPane) loader.load();
+			// a new stage for the new window
+			Stage newStage = new Stage();
+			newStage.setTitle("Sissekanne");
+			newStage.initModality(Modality.WINDOW_MODAL);
+			newStage.initOwner(primaryStage);
+			// and a new scene which can contain the anchorpane
+			Scene newScene = new Scene(newPage);
+			newStage.setScene(newScene);
+
+			// adding controller for the new window
+			AddController controller = loader.getController();
+			controller.setStage(newStage);
+			controller.setEntry(entry);
+
+			// show the stage and wait for user interaction
+			newStage.showAndWait();
+			return controller.isOk();
+
+		} catch (IOException error) {
+			error.printStackTrace();
+			return false;
 		}
 	}
 

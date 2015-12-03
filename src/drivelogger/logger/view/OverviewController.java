@@ -32,24 +32,26 @@ public class OverviewController {
 	 */
 	public OverviewController() {
 	}
-	
-	//Runs the code after the logentry view loads
+
+	// Runs the code after the logentry view loads
 	@FXML
-	public void initialize() {
-		 dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-		//dateColumn.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("date"));
-		
+	private void initialize() {
+		dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
+		// dateColumn.setCellValueFactory(new PropertyValueFactory<LogEntry,
+		// String>("date"));
+
 		showEntry(null);
-		logEntries.getSelectionModel().selectedItemProperty().addListener(
-				(observable, oldValue, newValue) -> showEntry(newValue));
+		logEntries.getSelectionModel().selectedItemProperty()
+				.addListener((observable, oldValue, newValue) -> showEntry(newValue));
 	}
 
 	public void setAppMain(AppMain appMain) {
 		this.appMain = appMain;
 		logEntries.setItems(appMain.getEntryList());
 	}
-	public void showEntry(LogEntry entry) {
-		if(entry != null) {
+
+	private void showEntry(LogEntry entry) {
+		if (entry != null) {
 			dateLabel.setText(entry.getDate());
 			startLabel.setText(Integer.toString(entry.getStartValue()));
 			endLabel.setText(Integer.toString(entry.getEndValue()));
@@ -59,12 +61,13 @@ public class OverviewController {
 			startLabel.setText("");
 			endLabel.setText("");
 			goalLabel.setText("");
-		}	
+		}
 	}
+
 	@FXML
-	public void deleteFromList() {
+	private void deleteFromList() {
 		int index = logEntries.getSelectionModel().getSelectedIndex();
-		if(index < 0) {
+		if (index < 0) {
 			Alert redAlert = new Alert(AlertType.WARNING);
 			redAlert.initOwner(appMain.getPrimaryStage());
 			redAlert.setTitle("Warning!");
@@ -75,5 +78,34 @@ public class OverviewController {
 			logEntries.getItems().remove(index);
 		}
 	}
-	
+
+	@FXML
+	private void addNewEntry() {
+		LogEntry newEntry = new LogEntry();
+		boolean clickOk = appMain.showEntryWindow(newEntry);
+		if (clickOk) {
+			appMain.getEntryList().add(newEntry);
+		}
+	}
+
+	@FXML
+	private void editEntry() {
+		LogEntry selectedEntry = logEntries.getSelectionModel().getSelectedItem();
+		if (selectedEntry != null) {
+			boolean clickOk = appMain.showEntryWindow(selectedEntry);
+			if (clickOk) {
+				showEntry(selectedEntry);
+			}
+
+		} else {
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.initOwner(appMain.getPrimaryStage());
+			alert.setTitle("No selection");
+			alert.setHeaderText("No person selected");
+			alert.setContentText("Please select  a person in the table");
+			alert.showAndWait();
+		}
+
+	}
+
 }
