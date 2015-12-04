@@ -12,6 +12,7 @@ public class LogEntry {
 	private final IntegerProperty startValue, endValue;
 
 	public LogEntry() {
+		//constructor calling constructor with null parameter
 		this(null);
 	}
 

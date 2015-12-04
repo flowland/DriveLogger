@@ -1,10 +1,18 @@
 package drivelogger.logger;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+import drivelogger.logger.model.ListWrapper;
 import drivelogger.logger.model.LogEntry;
 import drivelogger.logger.view.AddController;
 import drivelogger.logger.view.OverviewController;
+import drivelogger.logger.view.RootController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,12 +20,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 public class AppMain extends Application {
 
@@ -50,7 +54,7 @@ public class AppMain extends Application {
 	}
 
 	/**
-	 * Starts the root layout
+	 * Starts the root layout BorderPane
 	 * 
 	 * @param args
 	 */
@@ -63,10 +67,16 @@ public class AppMain extends Application {
 			// make and show the scene with root layout
 			Scene newScene = new Scene(rootLayout);
 			primaryStage.setScene(newScene);
+			//give controller access
+			RootController controller = loader.getController();
+			controller.setAppMain(this);
 			primaryStage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		File file = getPath();
+		if(file != null)
+			loadEntryData(file);
 	}
 
 	/**
@@ -118,21 +128,79 @@ public class AppMain extends Application {
 			return false;
 		}
 	}
-	/*public boolean showDeleteConfirmation() {
-		Stage confirmStage = new Stage();
-		confirmStage.setTitle("Kustuta kirje?");
-		Button okButton = new Button();
-		Button cancelButton = new Button();
-		Label warningLabel = new Label();
-		VBox alert = new VBox();
-		HBox buttons = new HBox();
-		buttons.getChildren().addAll(okButton, cancelButton);
-		alert.getChildren().addAll(warningLabel, buttons);
-		Scene scene = new Scene(alert, 200, 200);
-		confirmStage.setScene(scene);
-		confirmStage.show();
-	}*/
+	/**
+	 * Returns the file last opened
+	 * 
+	 * 
+	 * 
+	 * @return
+	 */
+	public File getPath() {
+	    Preferences prefs = Preferences.userNodeForPackage(AppMain.class);
+	    String path = prefs.get("filePath", null);
+	    if (path != null) {
+	        return new File(path);
+	    } else {
+	        return null;
+	    }
+	}
 
+	/**
+	 * Sets the file path of the currently loaded file. The path is persisted in
+	 * the OS specific registry.
+	 * 
+	 * @param file the file or null to remove the path
+	 */
+	public void setPath(File file) {
+	    Preferences prefs = Preferences.userNodeForPackage(AppMain.class);
+	    if (file != null) {
+	        prefs.put("filePath", file.getPath());
+
+	        // Update the stage title.
+	        primaryStage.setTitle("Sõidupäevik: " + file.getName());
+	    } else {
+	        prefs.remove("filePath");
+
+	        // Update the stage title.
+	        primaryStage.setTitle("Sõidupäevik");
+	    }
+	}
+	/**
+	 * Saves the current person data to the specified file.
+	 * 
+	 * @param file
+	 */
+	public void saveEntryData(File file) {
+		try {
+			JAXBContext context = JAXBContext.newInstance(ListWrapper.class);
+			Marshaller marsh = context.createMarshaller();
+			marsh.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			//wrapping the list
+			ListWrapper listwrap = new ListWrapper();
+			listwrap.setEntries(entryList);
+			//marshal and save to file
+			marsh.marshal(listwrap, file);
+			// save the path to registry;
+			setPath(file);
+		} catch (Exception e) {
+			
+		}
+	}
+	//loads the list from file
+	public void loadEntryData(File file) {
+		try {
+			JAXBContext context = JAXBContext.newInstance(ListWrapper.class);
+			Unmarshaller unm = context.createUnmarshaller();
+			//reading xml from file and u-marshalling into list
+			ListWrapper listwrap = (ListWrapper)unm.unmarshal(file);
+			
+			entryList.clear();
+			entryList.addAll(listwrap.getEntries());
+			setPath(file);
+		} catch (Exception e) {
+			
+		}
+	}
 	/**
 	 * Getter for the primary stage
 	 * 
@@ -141,7 +209,7 @@ public class AppMain extends Application {
 	public Stage getPrimaryStage() {
 		return primaryStage;
 	}
-
+	// actually launches the program
 	public static void main(String[] args) {
 		launch(args);
 	}
